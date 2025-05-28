@@ -12,7 +12,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductFaqController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\ProductUsageController;
-use App\Models\ProductImage;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -145,3 +145,7 @@ Route::post('/login/store', [AdminController::class, 'login'])->name('login');
 Route::post('/froala-upload', [ProductImageController::class, 'uploadFroalaImage'])
     ->name('admin.froala.upload')
     ->middleware(['auth']);
+Route::get('/migrate', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return 'Migrations completed!';
+});
