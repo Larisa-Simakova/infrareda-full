@@ -21,10 +21,9 @@ class ProductsTableSeeder extends Seeder
         try {
             // Очистка таблицы
             DB::table('products')->delete();
-            Log::info('Table "products" truncated');
+            Log::info("🗑️ Table 'products' truncated");
 
-            // Вставка данных
-            DB::table('products')->insert([
+            $data = [
                 [
                     'id' => 8,
                     'title' => 'Водяные инфракрасные панели отопления (ТПИ-28)',
@@ -65,13 +64,13 @@ class ProductsTableSeeder extends Seeder
                     'created_at' => '2025-05-24 00:58:10',
                     'updated_at' => '2025-05-24 01:16:57',
                 ],
-            ]);
+            ];
 
-            // Логируем успешное выполнение
-            Log::info('ProductsTableSeeder completed successfully');
+            DB::table('products')->insert($data);
+
+            Log::info("🎉 ProductsTableSeeder completed successfully");
         } catch (\Exception $e) {
-            // Логируем ошибку, если она возникла
-            Log::error('ProductsTableSeeder failed: ' . $e->getMessage());
+            Log::error("🔥 ProductsTableSeeder failed: " . $e->getMessage());
         }
     }
 }
