@@ -156,6 +156,15 @@ Route::get('/logs', function () {
     }
     return "Log file not found.";
 });
+Route::get('/seed-logs', function () {
+    $logPath = storage_path('logs/laravel.log');
+    if (!file_exists($logPath)) {
+        return 'Log file not found.';
+    }
+    $logContent = file_get_contents($logPath);
+    $filteredLogs = preg_grep('/Seeder/', explode("\n", $logContent));
+    return "<pre>" . implode("\n", $filteredLogs) . "</pre>";
+});
 Route::get('/seed', function () {
     Artisan::call('db:seed');
     return 'Seeded!';
