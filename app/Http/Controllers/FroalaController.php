@@ -62,7 +62,7 @@ class FroalaController extends Controller
             'src' => 'required|string'
         ]);
 
-        $path = str_replace(asset(''), '', $request->src);
+        $path = str_replace(secure_asset(''), '', $request->src);
         $fullPath = str_replace('storage/', 'public/', $path);
 
         if (Storage::exists($fullPath)) {

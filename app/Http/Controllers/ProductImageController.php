@@ -34,7 +34,7 @@ class ProductImageController extends Controller
             $tempFiles[$tempId] = $path;
             $uploadedImages[] = [
                 'temp_id' => $tempId,
-                'url' => asset('storage/' . $path)
+                'url' => secure_asset('storage/' . $path)
             ];
         }
 

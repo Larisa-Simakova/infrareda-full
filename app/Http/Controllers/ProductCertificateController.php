@@ -35,7 +35,7 @@ class ProductCertificateController extends Controller
             $uploadedFiles[] = [
                 'temp_id' => $tempId,
                 'name' => $file->getClientOriginalName(),
-                'url' => asset('storage/' . $path),
+                'url' => secure_asset('storage/' . $path),
                 'size' => $file->getSize()
             ];
         }

@@ -35,7 +35,7 @@ class PagesController extends Controller
         $objects = $query->get()->map(function ($project) {
             return [
                 'title' => $project->title,
-                'image_url' => asset('storage/' . $project->images->first()->url),
+                'image_url' => secure_asset('storage/' . $project->images->first()->url),
                 'place' => $project->place,
                 'date' => $project->date ? $project->date->format('Y-m-d') : null
             ];

@@ -65,7 +65,7 @@ class ProductAdvantageController extends Controller
                     }
                     // Проверяем существующее изображение
                     elseif (!empty($advantage['img'])) {
-                        $imagePath = str_replace(asset('storage/'), '', $advantage['img']);
+                        $imagePath = str_replace(secure_asset('storage/'), '', $advantage['img']);
                     }
 
                     Advantage::create([
