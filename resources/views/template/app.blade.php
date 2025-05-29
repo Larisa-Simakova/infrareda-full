@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/fonts.css') }}">
+    <link rel="stylesheet" href="{{ secure_asset('assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ secure_asset('assets/css/fonts.css') }}">
     <link rel="shortcut icon" href="{{ asset('./assets/images/logo/logo-short.svg') }}" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
@@ -19,9 +19,9 @@
     <!-- Плагин для загрузки изображений -->
     <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/translations/ru.js"></script>
     <script src="https://unpkg.com/imask"></script>
-    <script src="{{ asset('assets/js/script.js') }}" defer></script>
-    <script src="{{ asset('assets/js/admin-form.js') }}"></script>
-    <script src="{{ asset('assets/js/swiper-bundle.min.js') }}"></script>
+    <script src="{{ secure_asset('assets/js/script.js') }}" defer></script>
+    <script src="{{ secure_asset('assets/js/admin-form.js') }}"></script>
+    <script src="{{ secure_asset('assets/js/swiper-bundle.min.js') }}"></script>
     <title>Инфрарэда</title>
 </head>
 
