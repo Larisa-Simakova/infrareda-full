@@ -181,3 +181,10 @@ Route::get('/seed', function () {
     Artisan::call('db:seed');
     return 'Seeded!';
 });
+Route::get('/check-storage-link', function () {
+    if (file_exists(public_path('storage'))) {
+        return 'Ссылка на storage существует';
+    } else {
+        return 'Ссылка на storage НЕ создана';
+    }
+});
