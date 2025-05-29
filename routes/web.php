@@ -12,7 +12,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductFaqController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\ProductUsageController;
-// use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -155,4 +155,8 @@ Route::get('/logs', function () {
         return "<pre>" . file_get_contents($logPath) . "</pre>";
     }
     return "Log file not found.";
+});
+Route::get('/seed', function () {
+    Artisan::call('db:seed');
+    return 'Seeded!';
 });
