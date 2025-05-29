@@ -145,10 +145,10 @@ Route::post('/login/store', [AdminController::class, 'login'])->name('login');
 Route::post('/froala-upload', [ProductImageController::class, 'uploadFroalaImage'])
     ->name('admin.froala.upload')
     ->middleware(['auth']);
-// Route::get('/migrate', function () {
-//     Artisan::call('migrate', ['--force' => true]);
-//     return 'Migrations completed!';
-// });
+Route::get('/migrate', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return 'Migrations completed!';
+});
 Route::get('/logs', function () {
     $logPath = storage_path('logs/laravel.log');
     if (file_exists($logPath)) {
