@@ -156,6 +156,18 @@ Route::get('/logs', function () {
     }
     return "Log file not found.";
 });
+Route::get('/check-log', function () {
+    $logPath = storage_path('logs/laravel.log');
+
+    if (file_exists($logPath)) {
+        return 'Log file exists';
+    } else {
+        // Создаем файл вручную
+        touch($logPath);
+        chmod($logPath, 0777);
+        return 'Log file created';
+    }
+});
 Route::get('/seed-logs', function () {
     $logPath = storage_path('logs/laravel.log');
     if (!file_exists($logPath)) {
