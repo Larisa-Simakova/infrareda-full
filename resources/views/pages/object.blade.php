@@ -23,11 +23,11 @@
                     <div class="object__specifications">
                         <p class="text-medium">характеристики</p>
                         <div class="object__specification">
-                            <img src="{{ asset('assets/images/main/objects/square.svg') }}" alt="">
+                            <img src="{{ secure_asset('assets/images/main/objects/square.svg') }}" alt="">
                             <p class="text-small">Площадь: {{ $object->square }} м</p>
                         </div>
                         <div class="object__specification">
-                            <img src="{{ asset('assets/images/main/objects/height.svg') }}" alt="">
+                            <img src="{{ secure_asset('assets/images/main/objects/height.svg') }}" alt="">
                             <p class="text-small">Высота: {{ $object->height }} м</p>
                         </div>
                     </div>
@@ -38,7 +38,7 @@
                         <div class="swiper-wrapper">
                             @foreach ($object->images as $image)
                                 <div class="swiper-slide">
-                                    <img src="{{ asset('storage/' . $image->url) }}" alt="">
+                                    <img src="{{ secure_asset('storage/' . $image->url) }}" alt="">
                                 </div>
                             @endforeach
                         </div>
@@ -54,7 +54,7 @@
                             <div class="swiper-slide">
                                 <div class="objects__item">
                                     <div class="objects__img">
-                                        <img src="{{ asset('storage/' . $similarObject->images->first()->url) }}"
+                                        <img src="{{ secure_asset('storage/' . $similarObject->images->first()->url) }}"
                                             alt="{{ $similarObject->title }}">
                                         <div class="objects__place">
                                             <svg width="23" height="23" viewBox="0 0 23 23" fill="none"

@@ -7,7 +7,7 @@
             <div class="objects__items">
                 @forelse ($blogs as $blog)
                     <div class="blogs__item">
-                        <img src="{{ asset('storage/' . $blog->images->first()->url) }}" alt="">
+                        <img src="{{ secure_asset('storage/' . $blog->images->first()->url) }}" alt="">
                         <div class="blogs__content">
                             <p class="text-main">{{ $blog->title }}</p>
                             <div class="blogs__button">

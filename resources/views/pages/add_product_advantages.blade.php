@@ -62,7 +62,7 @@
                                 <div class="image-preview-container" id="advantage-image-preview-{{ $index }}">
                                     @if (!empty($advantage['img']))
                                         <div class="image-block">
-                                            <img src="{{ asset('storage/' . $advantage['img']) }}" alt="Preview">
+                                            <img src="{{ secure_asset('storage/' . $advantage['img']) }}" alt="Preview">
                                             <input type="hidden" name="advantages[{{ $index }}][img]"
                                                 value="{{ $advantage['img'] }}">
                                         </div>
@@ -274,11 +274,11 @@
                     <div class="form-input image-upload-container">
                         <div class="image-preview-container" id="advantage-image-preview-${newIndex}">
                             ${data.img ? `
-                                                                            <div class="image-block">
-                                                                                <img src="${data.img}" alt="Preview">
-                                                                                <input type="hidden" name="advantages[${newIndex}][img]" value="${data.img}">
-                                                                            </div>
-                                                                        ` : ''}
+                                                                                <div class="image-block">
+                                                                                    <img src="${data.img}" alt="Preview">
+                                                                                    <input type="hidden" name="advantages[${newIndex}][img]" value="${data.img}">
+                                                                                </div>
+                                                                            ` : ''}
                         </div>
 
                         <label class="button-red">

@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ secure_asset('assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ secure_asset('assets/css/fonts.css') }}">
-    <link rel="shortcut icon" href="{{ asset('./assets/images/logo/logo-short.svg') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ secure_asset('./assets/images/logo/logo-short.svg') }}" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/froala-editor@latest/css/froala_editor.pkgd.min.css" rel="stylesheet">

@@ -25,7 +25,7 @@
                 @forelse ($blogs as $blog)
                     <div class="blogs__item" data-blog-id="{{ $blog->id }}">
                         @if ($blog->images->isNotEmpty())
-                            <img src="{{ asset('storage/' . $blog->images->first()->url) }}" alt="">
+                            <img src="{{ secure_asset('storage/' . $blog->images->first()->url) }}" alt="">
                         @endif
                         <div class="blogs__content">
                             <p class="text-main">{{ $blog->title }}</p>

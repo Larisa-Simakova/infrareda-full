@@ -187,7 +187,7 @@
                                     {{ strtok(strip_tags(html_entity_decode($product->description)), '.') }}
                                 </div>
                             </div>
-                            <img src="{{ asset('storage/' . $product->images->first()->url) }}" alt="">
+                            <img src="{{ secure_asset('storage/' . $product->images->first()->url) }}" alt="">
                         </div>
                         <div class="products__buttons">
                             <a href="{{ route('view.product', $product->id) }}" class="button-red-arrow">
@@ -279,7 +279,7 @@
                     <div class="swiper-slide">
                         <div class="objects__item" data-product-id="{{ $object->product_id }}">
                             <div class="objects__img">
-                                <img src="{{ asset('storage/' . $object->images->first()->url) }}" alt="">
+                                <img src="{{ secure_asset('storage/' . $object->images->first()->url) }}" alt="">
                                 <div class="objects__place">
                                     <svg width="23" height="23" viewBox="0 0 23 23" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
@@ -343,7 +343,7 @@
 
             <div class="blogs__items">
                 <div class="blogs__item">
-                    <img src="{{ asset('storage/' . $latestBlog->images->first()->url) }}"
+                    <img src="{{ secure_asset('storage/' . $latestBlog->images->first()->url) }}"
                         alt="{{ $latestBlog->title }}">
                     <div class="blogs__content">
                         <div class="blogs__description">

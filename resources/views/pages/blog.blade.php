@@ -12,7 +12,7 @@
                             <div class="swiper-wrapper">
                                 @foreach ($blog->images as $image)
                                     <div class="swiper-slide">
-                                        <img src="{{ asset('storage/' . $image->url) }}" alt="">
+                                        <img src="{{ secure_asset('storage/' . $image->url) }}" alt="">
                                     </div>
                                 @endforeach
                             </div>
@@ -29,7 +29,7 @@
                         @foreach ($blogs as $blog)
                             <div class="swiper-slide">
                                 <div class="blogs__item">
-                                    <img src="{{ asset('storage/' . $blog->images->first()->url) }}">
+                                    <img src="{{ secure_asset('storage/' . $blog->images->first()->url) }}">
                                     <div class="blogs__content">
                                         <p class="text-main">{{ $blog->title }}</p>
                                         <div class="blogs__button">

@@ -27,7 +27,7 @@
                     </div>
 
                     <div class="products__buttons">
-                        <a href="{{ asset('assets/Опросный лист для подбора ТПИ-28.docx') }}" target="_blank"
+                        <a href="{{ secure_asset('assets/Опросный лист для подбора ТПИ-28.docx') }}" target="_blank"
                             class="button-transparent-arrow">
                             <span class="text">опросный лист</span>
                             <span class="icon icon-survey">
@@ -44,7 +44,7 @@
                                 </svg>
                             </span>
                         </a>
-                        <a href="{{ asset('assets/Техническая документация ТПИ-28.pdf') }}" target="_blank"
+                        <a href="{{ secure_asset('assets/Техническая документация ТПИ-28.pdf') }}" target="_blank"
                             class="button-transparent-arrow">
                             <span class="text">техническая документация</span>
                             <span class="icon icon-survey">
@@ -80,7 +80,7 @@
                         <div class="swiper-wrapper">
                             @foreach ($product->images as $image)
                                 <div class="swiper-slide">
-                                    <img src="{{ asset('storage/' . $image->url) }}" alt="">
+                                    <img src="{{ secure_asset('storage/' . $image->url) }}" alt="">
                                 </div>
                             @endforeach
                         </div>
@@ -243,7 +243,7 @@
                                 @foreach ($product->advantages as $advantage)
                                     <div class="products__advantage">
                                         <div class="advantage__title">
-                                            <img src="{{ asset('storage/' . $advantage->img) }}" alt="">
+                                            <img src="{{ secure_asset('storage/' . $advantage->img) }}" alt="">
                                             <p class="text-main">{{ $advantage->title }}</p>
                                         </div>
                                         <div class="advantage__content">
@@ -336,7 +336,7 @@
                     @if ($hasCertificates)
                         <div class="tabs__panel sertificates">
                             @foreach ($product->certificates as $certificate)
-                                <a class="button-red" href="{{ asset('storage/' . $certificate->url) }}"
+                                <a class="button-red" href="{{ secure_asset('storage/' . $certificate->url) }}"
                                     target="_blank">
                                     Скачать сертификат
                                 </a>
@@ -517,7 +517,7 @@
                         <div class="swiper-slide">
                             <div class="objects__item">
                                 <div class="objects__img">
-                                    <img src="{{ asset('storage/' . $object->images->first()->url) }}" alt="">
+                                    <img src="{{ secure_asset('storage/' . $object->images->first()->url) }}" alt="">
                                     <div class="objects__place">
                                         <svg width="23" height="23" viewBox="0 0 23 23" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
@@ -584,7 +584,7 @@
 
             <div class="blogs__items">
                 <div class="blogs__item">
-                    <img src="{{ asset('storage/' . $latestBlog->images->first()->url) }}"
+                    <img src="{{ secure_asset('storage/' . $latestBlog->images->first()->url) }}"
                         alt="{{ $latestBlog->title }}">
                     <div class="blogs__content">
                         <div class="blogs__description">

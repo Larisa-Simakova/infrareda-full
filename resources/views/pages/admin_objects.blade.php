@@ -39,7 +39,7 @@
                     <div class="objects__item" data-product-id="{{ $object->product_id }}"
                         data-object-id="{{ $object->id }}">
                         <div class="objects__img">
-                            <img src="{{ asset('storage/' . $object->images->first()->url) }}" alt="">
+                            <img src="{{ secure_asset('storage/' . $object->images->first()->url) }}" alt="">
                             <div class="objects__place">
                                 <svg width="23" height="23" viewBox="0 0 23 23" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">

@@ -31,10 +31,10 @@
                         <!-- Изображение объекта -->
                         <div class="objects__img">
                             @if ($object->images->first())
-                                <img src="{{ asset('storage/' . $object->images->first()->url) }}"
+                                <img src="{{ secure_asset('storage/' . $object->images->first()->url) }}"
                                     alt="{{ $object->title }}">
                             @else
-                                <img src="{{ asset('images/default-project.jpg') }}" alt="Изображение отсутствует">
+                                <img src="{{ secure_asset('images/default-project.jpg') }}" alt="Изображение отсутствует">
                             @endif
 
                             <!-- Местоположение -->
@@ -87,10 +87,12 @@
             @if ($objects->total() > 0)
                 <div class="pagination">
                     @if ($objects->onFirstPage())
-                        <span class="pagination-arrow disabled"><</span>
+                        <span class="pagination-arrow disabled">
+                            << /span>
                             @else
                                 <a href="{{ $objects->appends(request()->except('page'))->previousPageUrl() }}"
-                                    class="pagination-arrow"><</a>
+                                    class="pagination-arrow">
+                                    << /a>
                     @endif
 
                     @foreach ($objects->getUrlRange(1, $objects->lastPage()) as $page => $url)

@@ -22,8 +22,10 @@
                     @foreach ($product->certificates as $certificate)
                         <div class="file-block" data-id="{{ $certificate->id }}">
                             <div class="file-preview">
-                                <a href="{{ asset('storage/' . $certificate->url) }}" target="_blank" class="file-info text-small" style="padding: 1em 0;">
-                                    <span class="file-name" style="color: #191919 !important;">{{ basename($certificate->url) }}</span>
+                                <a href="{{ secure_asset('storage/' . $certificate->url) }}" target="_blank"
+                                    class="file-info text-small" style="padding: 1em 0;">
+                                    <span class="file-name"
+                                        style="color: #191919 !important;">{{ basename($certificate->url) }}</span>
                                 </a>
                             </div>
                             <button type="button" class="button-transparent delete-file" data-id="{{ $certificate->id }}"

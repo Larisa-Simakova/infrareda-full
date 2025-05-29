@@ -39,7 +39,7 @@
                 @if ($product && $product->images)
                     @foreach ($product->images as $image)
                         <div class="image-block" data-id="{{ $image->id }}">
-                            <img src="{{ asset('storage/' . str_replace('public/', '', $image->url)) }}"
+                            <img src="{{ secure_asset('storage/' . str_replace('public/', '', $image->url)) }}"
                                 alt="Изображение товара">
                             <button type="button" class="button-transparent delete-image" data-id="{{ $image->id }}"
                                 data-container="productImages"

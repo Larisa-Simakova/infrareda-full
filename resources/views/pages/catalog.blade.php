@@ -29,7 +29,7 @@
                             </div>
                         </div>
                         <div class="catalog__item__img">
-                            <img src="{{ asset('storage/' . $product->images->first()->url) }}" alt="">
+                            <img src="{{ secure_asset('storage/' . $product->images->first()->url) }}" alt="">
                         </div>
                     </div>
                 @empty

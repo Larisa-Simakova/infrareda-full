@@ -99,7 +99,7 @@
                         <div class="update-images" id="objectImages">
                             @foreach ($object->images as $image)
                                 <div class="image-block" data-id="{{ $image->id }}">
-                                    <img src="{{ asset('storage/' . $image->url) }}" alt="">
+                                    <img src="{{ secure_asset('storage/' . $image->url) }}" alt="">
                                     <button type="button" class="button-transparent delete-image"
                                         data-id="{{ $image->id }}"
                                         data-delete-route="{{ route('object.image.delete') }}">
