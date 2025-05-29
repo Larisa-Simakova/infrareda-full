@@ -12,15 +12,19 @@ class TestSeeder extends Seeder
     {
         Log::info("🧪 TestSeeder started");
 
-        DB::table('products')->insert([
-            'id' => 999,
-            'title' => 'Test Product',
-            'description' => '<p id="isPasted" class="paragraph-normal">Инфракрасные панели ТПИ-Э &ndash; это современная альтернатива традиционным системам отопления...</p>',
-            'short_description' => 'This is a test product',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        try {
+            DB::table('products')->insert([
+                'id' => 999,
+                'title' => 'Test Product',
+                'short_description' => 'This is a test product description.',
+                'description' => '<p>This is a test product description.</p>',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-        Log::info("✅ TestSeeder completed");
+            Log::info("✅ TestSeeder successfully inserted data");
+        } catch (\Exception $e) {
+            Log::error("🔥 TestSeeder failed: " . $e->getMessage());
+        }
     }
 }
