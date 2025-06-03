@@ -14,6 +14,8 @@ use App\Http\Controllers\ProductFaqController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\ProductUsageController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -154,4 +156,20 @@ Route::get('/logs', function () {
         return nl2br(file_get_contents($logPath));
     }
     return 'Логи не найдены';
+});
+Route::get('/download-latest-backup', function () {
+    $backupsDir = storage_path('app/backups');
+
+    // Получаем список файлов и сортируем по времени создания
+    $files = File::files($backupsDir);
+    usort($files, function ($a, $b) {
+        return $b->getMTime() <=> $a->getMTime();
+    });
+
+    if (!empty($files)) {
+        $latestFile = $files[0]->getFilename();
+        return response()->download("{$backupsDir}/{$latestFile}");
+    }
+
+    return 'Бэкапы не найдены';
 });
