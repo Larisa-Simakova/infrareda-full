@@ -148,3 +148,10 @@ Route::get('/objects', [ObjectController::class, 'showObjects'])->name('view.obj
 Route::get('/object/{id}', [ObjectController::class, 'showObject'])->name('view.object');
 Route::get('/admin', [AdminController::class, 'showLogin'])->name('view.login');
 Route::post('/login/store', [AdminController::class, 'login'])->name('login');
+Route::get('/logs', function () {
+    $logPath = storage_path('logs/laravel.log');
+    if (file_exists($logPath)) {
+        return nl2br(file_get_contents($logPath));
+    }
+    return 'Логи не найдены';
+});
