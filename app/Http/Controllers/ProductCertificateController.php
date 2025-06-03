@@ -43,12 +43,12 @@ class ProductCertificateController extends Controller
                     $pdf = new Pdf(storage_path('app/public/' . $path));
                     $previewPath = "temp/{$fileType}/preview_" . pathinfo($originalName, PATHINFO_FILENAME) . '.jpg';
                     $pdf->setPage(1)->saveImage(storage_path('app/public/' . $previewPath));
-                    $previewUrl = asset('storage/' . $previewPath);
+                    $previewUrl = secure_asset('storage/' . $previewPath);
                 } catch (\Exception $e) {
                     $previewUrl = null;
                 }
             } else {
-                $previewUrl = asset('storage/' . $path);
+                $previewUrl = secure_asset('storage/' . $path);
             }
 
             $tempFiles[$tempId] = [
@@ -60,7 +60,7 @@ class ProductCertificateController extends Controller
             $uploadedFiles[] = [
                 'temp_id' => $tempId,
                 'name' => $originalName,
-                'url' => asset('storage/' . $path),
+                'url' => secure_asset('storage/' . $path),
                 'preview_url' => $previewUrl,
                 'is_pdf' => $extension === 'pdf',
                 'size' => $file->getSize()

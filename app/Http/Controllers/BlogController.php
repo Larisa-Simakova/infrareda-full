@@ -36,7 +36,7 @@ class BlogController extends Controller
         ]);
 
         $path = $request->file('upload')->store('public/description-images');
-        $url = asset(Storage::url($path));
+        $url = secure_asset(Storage::url($path));
 
         return response()->json([
             'url' => $url,
@@ -197,7 +197,7 @@ class BlogController extends Controller
             $tempFiles[$tempId] = $path;
 
             $uploadedImages[] = [
-                'url' => asset('storage/' . $path),
+                'url' => secure_asset('storage/' . $path),
                 'temp_id' => $tempId
             ];
         }
