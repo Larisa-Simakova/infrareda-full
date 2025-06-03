@@ -16,7 +16,7 @@ class ObjectController extends Controller
     {
         $products = Product::all();
 
-        $query = Project::query();
+        $query = Project::orderBy('date', 'desc');
 
         if ($request->has('product_id') && $request->product_id != 'all') {
             $query->where('product_id', $request->product_id);
@@ -55,7 +55,7 @@ class ObjectController extends Controller
         ]);
 
         $path = $request->file('upload')->store('public/description-images');
-        $url = secure_asset(Storage::url($path));
+        $url = asset(Storage::url($path));
 
         return response()->json([
             'url' => $url,
@@ -235,7 +235,7 @@ class ObjectController extends Controller
             $tempFiles[$tempId] = $path;
 
             $uploadedImages[] = [
-                'url' => secure_asset('storage/' . $path),
+                'url' => asset('storage/' . $path),
                 'temp_id' => $tempId
             ];
         }

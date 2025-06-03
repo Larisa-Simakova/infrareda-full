@@ -12,22 +12,38 @@
             <div id="certificates-container">
                 <div class="form-input">
                     <label class="button-red">
-                        <span>Загрузить PDF сертификаты</span>
+                        <span>Загрузить сертификаты</span>
                         <input type="file" name="files[]" id="pdfCertificateUpload" multiple class="visually-hidden"
-                            accept=".pdf">
+                            accept=".pdf,.jpg,.jpeg,.png,.webp">
                     </label>
                     <div id="pdfErrors" class="error-container"></div>
                 </div>
-                <div id="certificateFiles" class="update-files">
+                <div id="certificateFiles" class="update-images">
                     @foreach ($product->certificates as $certificate)
-                        <div class="file-block" data-id="{{ $certificate->id }}">
-                            <div class="file-preview">
-                                <a href="{{ secure_asset('storage/' . $certificate->url) }}" target="_blank"
-                                    class="file-info text-small" style="padding: 1em 0;">
-                                    <span class="file-name"
-                                        style="color: #191919 !important;">{{ basename($certificate->url) }}</span>
-                                </a>
-                            </div>
+                        @php
+                            $isPdf = pathinfo($certificate->url, PATHINFO_EXTENSION) === 'pdf';
+                            $previewPath = $isPdf
+                                ? str_replace('.pdf', '_preview.jpg', $certificate->url)
+                                : $certificate->url;
+                        @endphp
+
+                        <div class="image-block" data-id="{{ $certificate->id }}">
+                            <a href="{{ secure_asset('storage/' . $certificate->url) }}" target="_blank">
+                                @if ($isPdf)
+                                    @if (Storage::disk('public')->exists($previewPath))
+                                        <img src="{{ secure_asset('storage/' . $previewPath) }}" alt="PDF preview">
+                                    @else
+                                        <svg viewBox="0 0 24 24" width="48" height="48">
+                                            <path fill="#FF0000"
+                                                d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                            <path fill="#000000"
+                                                d="M10,12A2,2 0 0,0 8,14V16A2,2 0 0,0 10,18H11V21H13V18H14A2,2 0 0,0 16,16V14A2,2 0 0,0 14,12H10M10,14H14V16H10V14Z" />
+                                        </svg>
+                                    @endif
+                                @else
+                                    <img src="{{ secure_asset('storage/' . $certificate->url) }}" alt="Превью сертификата">
+                                @endif
+                            </a>
                             <button type="button" class="button-transparent delete-file" data-id="{{ $certificate->id }}"
                                 data-delete-route="{{ route('admin.products.certificates.destroy', ['product' => $product->id, 'certificate' => $certificate->id]) }}">
                                 Удалить
@@ -53,7 +69,7 @@
                 if (!e.target.classList.contains('delete-file')) return;
 
                 const button = e.target;
-                const fileBlock = button.closest('.file-block');
+                const fileBlock = button.closest('.image-block');
                 if (!fileBlock) return;
 
                 if (!confirm('Вы уверены, что хотите удалить этот сертификат?')) {
@@ -112,7 +128,7 @@
                 }
             });
 
-            // Загрузка PDF файлов
+            // Загрузка файлов
             document.getElementById('pdfCertificateUpload').addEventListener('change', function(e) {
                 const files = e.target.files;
                 const errorContainer = document.getElementById('pdfErrors');
@@ -123,12 +139,6 @@
                 // Проверка формата файлов
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    if (file.type !== 'application/pdf' || !file.name.toLowerCase().endsWith('.pdf')) {
-                        errorContainer.textContent = 'Можно загружать только PDF файлы';
-                        e.target.value = '';
-                        return;
-                    }
-
                     if (file.size > 10 * 1024 * 1024) {
                         errorContainer.textContent = 'Максимальный размер файла - 10MB';
                         e.target.value = '';
@@ -160,21 +170,31 @@
                         if (data.success && data.files && data.files.length > 0) {
                             data.files.forEach(file => {
                                 const fileBlock = document.createElement('div');
-                                fileBlock.className = 'file-block';
+                                fileBlock.className = 'image-block';
                                 fileBlock.dataset.tempId = file.temp_id;
+
+                                const previewContent = file.is_pdf ?
+                                    file.preview_url ?
+                                    `<img src="${file.preview_url}" alt="PDF preview">` :
+                                    `
+                        <svg viewBox="0 0 24 24" width="48" height="48">
+                            <path fill="#FF0000" d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                            <path fill="#000000" d="M10,12A2,2 0 0,0 8,14V16A2,2 0 0,0 10,18H11V21H13V18H14A2,2 0 0,0 16,16V14A2,2 0 0,0 14,12H10M10,14H14V16H10V14Z" />
+                        </svg>
+                    ` :
+                                    `<img src="${file.url}" alt="Превью сертификата">`;
+
                                 fileBlock.innerHTML = `
-                                <div class="file-preview">
-                                    <div class="file-info text-small" sstyle="padding: 1em 0;">
-                                        <span class="file-name" style="color: #191919 !important;">${file.name}</span>
-                                    </div>
-                                </div>
-                                <button type="button" class="button-transparent delete-file"
-                                    data-temp-id="${file.temp_id}"
-                                    data-delete-route="{{ route('admin.products.certificates.temp-delete') }}">
-                                    Удалить
-                                </button>
-                                <input type="hidden" name="uploaded_files[]" value="${file.temp_id}">
-                            `;
+                    <a href="${file.url}" target="_blank">
+                        ${previewContent}
+                    </a>
+                <button type="button" class="button-transparent delete-file"
+                    data-temp-id="${file.temp_id}"
+                    data-delete-route="{{ route('admin.products.certificates.temp-delete') }}">
+                    Удалить
+                </button>
+                <input type="hidden" name="uploaded_files[]" value="${file.temp_id}">
+            `;
                                 document.getElementById('certificateFiles').appendChild(
                                     fileBlock);
                             });
@@ -188,7 +208,7 @@
                     })
                     .finally(() => {
                         uploadLabel.style.opacity = '1';
-                        uploadLabel.querySelector('span').textContent = 'Загрузить PDF сертификаты';
+                        uploadLabel.querySelector('span').textContent = 'Загрузить сертификаты';
                         e.target.value = '';
                     });
             });

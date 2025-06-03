@@ -13,7 +13,7 @@ class BlogController extends Controller
 {
     public function showBlogs()
     {
-        $blogs = Blog::paginate(6);
+        $blogs = Blog::orderBy('date', 'desc')->paginate(6);
         return view('pages.blogs', compact('blogs'));
     }
 
@@ -36,7 +36,7 @@ class BlogController extends Controller
         ]);
 
         $path = $request->file('upload')->store('public/description-images');
-        $url = secure_asset(Storage::url($path));
+        $url = asset(Storage::url($path));
 
         return response()->json([
             'url' => $url,
@@ -197,7 +197,7 @@ class BlogController extends Controller
             $tempFiles[$tempId] = $path;
 
             $uploadedImages[] = [
-                'url' => secure_asset('storage/' . $path),
+                'url' => asset('storage/' . $path),
                 'temp_id' => $tempId
             ];
         }

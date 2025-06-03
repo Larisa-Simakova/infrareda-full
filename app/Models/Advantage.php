@@ -8,14 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Advantage extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'title',
-        'description',
-        'img',
-        'product_id',
-        'infrared_description',
-        'traditional_description',
-    ];
+    'title',
+    'description',
+    'traditional_description',
+    'infrared_description',
+    'img',
+    'product_id',
+    'order'
+];
 
     public function product() {
         return $this->belongsTo(Product::class);

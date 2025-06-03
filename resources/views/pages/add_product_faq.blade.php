@@ -1,7 +1,7 @@
 @extends('pages.add_product_base')
 @section('product-content')
-    <form class="form-update" action="{{ route('admin.products.faq.store', $product->id) }}" method="POST"
-        id="faqForm" enctype="multipart/form-data">
+    <form class="form-update" action="{{ route('admin.products.faq.store', $product->id) }}" method="POST" id="faqForm"
+        enctype="multipart/form-data">
         @csrf
         <input type="hidden" name="step" value="faq">
 
@@ -35,8 +35,8 @@
 
                             <div class="form-input">
                                 <label class="text-medium" for="faq-answer-{{ $index }}">Ответ</label>
-                                <textarea id="faq-answer-{{ $index }}" name="faqs[{{ $index }}][answer]"
-                                    class="input-white froala-editor" placeholder="Введите ответ">{{ $faq['answer'] ?? '' }}</textarea>
+                                <textarea id="faq-answer-{{ $index }}" name="faqs[{{ $index }}][answer]" class="input-white froala-editor"
+                                    placeholder="Введите ответ">{{ $faq['answer'] ?? '' }}</textarea>
                             </div>
 
                             <button type="button" class="button-transparent remove-item">Удалить вопрос</button>
@@ -156,8 +156,8 @@
                     const answerEditor = froalaEditors[index];
 
                     const isFilled = question.value.trim() !== '' ||
-                                   (answerEditor && answerEditor.html.get().trim() !== '' &&
-                                    answerEditor.html.get() !== '<p><br></p>');
+                        (answerEditor && answerEditor.html.get().trim() !== '' &&
+                            answerEditor.html.get() !== '<p><br></p>');
 
                     if (isFilled) {
                         hasFilledFields = true;
@@ -172,7 +172,8 @@
                         if (!answerEditor || answerEditor.html.get().trim() === '' ||
                             answerEditor.html.get() === '<p><br></p>') {
                             fields.push({
-                                el: item.querySelector(`textarea[name="faqs[${index}][answer]"]`),
+                                el: item.querySelector(
+                                    `textarea[name="faqs[${index}][answer]"]`),
                                 message: 'Заполните ответ'
                             });
                         }

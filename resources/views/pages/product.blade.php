@@ -234,14 +234,14 @@
                                     </div>
                                 </div>
                             </form>
-                            <img class="form-fon" src="assets/images/main/form-fon.png" alt="">
+                            <img class="form-fon" src="{{ secure_asset('./assets/images/main/form-fon.png') }}" alt="">
                         </div>
                     </div>
                     @if ($hasAdvantages)
                         <div class="tabs__panel">
-                            <div class="products__advantages">
+                            <div class="products__advantages" id="sortable-advantages">
                                 @foreach ($product->advantages as $advantage)
-                                    <div class="products__advantage">
+                                    <div class="products__advantage" data-advantage-id="{{ $advantage->id }}">
                                         <div class="advantage__title">
                                             <img src="{{ secure_asset('storage/' . $advantage->img) }}" alt="">
                                             <p class="text-main">{{ $advantage->title }}</p>
@@ -261,11 +261,21 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @auth
+                                            @if (auth()->user()->role === 'admin')
+                                                <div class="advantage-admin-controls">
+                                                    <span class="drag-handle">≡</span>
+                                                    <a href="{{ route('admin.products.edit', ['product' => $product->id, 'step' => 'advantages']) }}"
+                                                        class="edit-btn">✎</a>
+                                                </div>
+                                            @endif
+                                        @endauth
                                     </div>
                                 @endforeach
                             </div>
                         </div>
                     @endif
+
 
                     @if ($hasModifications)
                         <div class="tabs__panel">
@@ -335,12 +345,40 @@
 
                     @if ($hasCertificates)
                         <div class="tabs__panel sertificates">
-                            @foreach ($product->certificates as $certificate)
-                                <a class="button-red" href="{{ secure_asset('storage/' . $certificate->url) }}"
-                                    target="_blank">
-                                    Скачать сертификат
-                                </a>
-                            @endforeach
+                            <div class="update-images">
+                                @foreach ($product->certificates as $certificate)
+                                    @php
+                                        $isPdf = pathinfo($certificate->url, PATHINFO_EXTENSION) === 'pdf';
+                                        $previewPath = $isPdf
+                                            ? str_replace('.pdf', '_preview.jpg', $certificate->url)
+                                            : $certificate->url;
+                                    @endphp
+
+                                    <div class="image-block">
+                                        <a href="{{ secure_asset('storage/' . $certificate->url) }}" target="_blank">
+                                            @if ($isPdf)
+                                                @if (Storage::disk('public')->exists($previewPath))
+                                                    <img src="{{ secure_asset('storage/' . $previewPath) }}" alt="PDF preview">
+                                                @else
+                                                    <svg viewBox="0 0 24 24" width="48" height="48">
+                                                        <path fill="#FF0000"
+                                                            d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                                        <path fill="#000000"
+                                                            d="M10,12A2,2 0 0,0 8,14V16A2,2 0 0,0 10,18H11V21H13V18H14A2,2 0 0,0 16,16V14A2,2 0 0,0 14,12H10M10,14H14V16H10V14Z" />
+                                                    </svg>
+                                                @endif
+                                            @else
+                                                <img src="{{ secure_asset('storage/' . $certificate->url) }}"
+                                                    alt="Превью сертификата">
+                                            @endif
+                                        </a>
+                                        <a class="button-red download-button"
+                                            href="{{ secure_asset('storage/' . $certificate->url) }}" target="_blank" download>
+                                            Скачать
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
 
@@ -481,7 +519,8 @@
                                         </div>
                                     </div>
                                 </form>
-                                <img class="form-fon" src="assets/images/main/form-fon.png" alt="">
+                                <img class="form-fon" src="{{ secure_asset('./assets/images/main/form-fon.png') }}"
+                                    alt="">
                             </div>
                         </div>
                     @endif
@@ -683,107 +722,97 @@
     </div>
 
     <script>
-        class Tabs {
-            constructor(container) {
-                this.tabs = container;
-                this.buttons = this.tabs.querySelectorAll('.tab');
-                this.panels = this.tabs.querySelectorAll('.tabs__panel');
+        document.addEventListener("DOMContentLoaded", function() {
+            // === Tabs Class ===
+            class Tabs {
+                constructor(container) {
+                    this.tabs = container;
+                    this.buttons = this.tabs.querySelectorAll('.tab');
+                    this.panels = this.tabs.querySelectorAll('.tabs__panel');
+                    this.init();
+                }
 
-                this.init();
+                init() {
+                    this.buttons.forEach((btn, index) => {
+                        btn.addEventListener('click', () => this.activateTab(index));
+                    });
+                }
+
+                activateTab(index) {
+                    this.buttons.forEach(btn => {
+                        btn.classList.remove('button-red');
+                        btn.classList.add('button-transparent');
+                    });
+                    this.buttons[index].classList.add('button-red');
+                    this.buttons[index].classList.remove('button-transparent');
+                    this.panels.forEach(panel => panel.classList.remove('is-active'));
+                    this.panels[index].classList.add('is-active');
+
+                    // Вызов функции только при открытии вкладки "Преимущества"
+                    if (this.buttons[index].dataset.tab === 'advantages') {
+                        setTimeout(equalizeComparisonHeights, 100);
+                    }
+                }
             }
 
-            init() {
-                this.buttons.forEach((btn, index) => {
-                    btn.addEventListener('click', () => this.activateTab(index));
-                });
-            }
+            document.querySelectorAll('.tabs').forEach(tabs => new Tabs(tabs));
 
-            activateTab(index) {
-                // Обрабатываем все кнопки
-                this.buttons.forEach(btn => {
-                    // Для неактивных кнопок
-                    btn.classList.remove('button-red');
-                    btn.classList.add('button-transparent');
-                });
-
-                // Обрабатываем активную кнопку
-                this.buttons[index].classList.add('button-red');
-                this.buttons[index].classList.remove('button-transparent');
-
-                // Обрабатываем панели
-                this.panels.forEach(panel => panel.classList.remove('is-active'));
-                this.panels[index].classList.add('is-active');
-            }
-        }
-
-        // Инициализация всех табов на странице
-        document.querySelectorAll('.tabs').forEach(tabs => new Tabs(tabs));
-
-        document.addEventListener('DOMContentLoaded', function() {
+            // === Slider for Characteristics ===
             const slider = document.getElementById('specsSlider');
             const scrollable = document.getElementById('scrollableContent');
             const customThumb = document.getElementById('customThumb');
-
             let isDragging = false;
-            let maxScroll = scrollable.scrollWidth - scrollable.clientWidth;
+            let maxScroll = scrollable ? scrollable.scrollWidth - scrollable.clientWidth : 0;
 
-            // Обновление позиций
             function updateSlider() {
                 if (isDragging) return;
-
-                maxScroll = scrollable.scrollWidth - scrollable.clientWidth;
+                maxScroll = scrollable ? scrollable.scrollWidth - scrollable.clientWidth : 0;
                 const scrollPercent = maxScroll > 0 ? (scrollable.scrollLeft / maxScroll) * 100 : 0;
-
-                slider.value = scrollPercent;
-                updateThumbPosition(scrollPercent);
+                if (slider) slider.value = scrollPercent;
+                if (customThumb) updateThumbPosition(scrollPercent);
             }
 
-            // Позиция кастомного ползунка
             function updateThumbPosition(percent) {
-                const sliderWidth = slider.offsetWidth;
-                const thumbWidth = customThumb.offsetWidth;
+                const sliderWidth = slider?.offsetWidth || 0;
+                const thumbWidth = customThumb?.offsetWidth || 0;
                 const thumbPosition = (percent / 100) * (sliderWidth - thumbWidth);
-
-                customThumb.style.left = `${thumbPosition}px`;
-                slider.style.setProperty('--progress', `${percent}%`);
+                if (customThumb) customThumb.style.left = `${thumbPosition}px`;
+                if (slider) slider.style.setProperty('--progress', `${percent}%`);
             }
 
-            // Обработчик для ползунка
-            slider.addEventListener('input', function() {
-                if (!isDragging) isDragging = true;
+            if (slider) {
+                slider.addEventListener('input', function() {
+                    if (!isDragging) isDragging = true;
+                    const percent = this.value;
+                    if (scrollable) scrollable.scrollLeft = (percent / 100) * maxScroll;
+                    updateThumbPosition(percent);
+                });
+                slider.addEventListener('change', function() {
+                    isDragging = false;
+                });
+            }
 
-                const percent = this.value;
-                scrollable.scrollLeft = (percent / 100) * maxScroll;
-                updateThumbPosition(percent);
-            });
+            if (scrollable) {
+                scrollable.addEventListener('scroll', function() {
+                    if (!isDragging) requestAnimationFrame(updateSlider);
+                });
+            }
 
-            slider.addEventListener('change', function() {
-                isDragging = false;
-            });
-
-            // Обработчик для прокрутки
-            scrollable.addEventListener('scroll', function() {
-                if (!isDragging) {
-                    requestAnimationFrame(updateSlider);
-                }
-            });
-
-            // Ресайз
             function handleResize() {
-                maxScroll = scrollable.scrollWidth - scrollable.clientWidth;
+                if (scrollable) {
+                    maxScroll = scrollable.scrollWidth - scrollable.clientWidth;
+                }
                 updateSlider();
                 syncHeights();
             }
 
             const resizeObserver = new ResizeObserver(handleResize);
-            resizeObserver.observe(scrollable);
+            if (scrollable) resizeObserver.observe(scrollable);
             resizeObserver.observe(document.body);
 
-            // Синхронизация высот
             function syncHeights() {
                 const specsItems = document.querySelectorAll('#specsList .specs-item');
                 const specsColumns = document.querySelectorAll('.specs-column');
-
                 specsColumns.forEach(column => {
                     const values = column.querySelectorAll('.specs-value');
                     values.forEach((value, index) => {
@@ -794,9 +823,183 @@
                 });
             }
 
-            // Инициализация
             updateSlider();
             syncHeights();
+
+            // === equalizeComparisonHeights Function ===
+            function forceReflow(element) {
+                void element?.offsetHeight;
+            }
+
+            function equalizeComparisonHeights() {
+                const container = document.querySelector('.products__advantages');
+                if (!container) return;
+
+                forceReflow(container); // Принудительная перерисовка
+
+                const comparisons = container.querySelectorAll('.advantage__comparison');
+                if (comparisons.length <= 1) {
+                    // Если одна или ноль карточек — ничего не делаем
+                    comparisons.forEach(comparison => {
+                        comparison.style.height = 'auto'; // Убираем фиксированную высоту
+                    });
+                    return;
+                }
+
+                let maxHeight = 0;
+
+                comparisons.forEach(comparison => {
+                    comparison.style.height = 'auto';
+                });
+
+                const images = container.querySelectorAll('img');
+                let imagesLoaded = 0;
+
+                function checkImagesLoaded() {
+                    if (imagesLoaded === images.length) {
+                        comparisons.forEach(comparison => {
+                            const height = comparison.offsetHeight;
+                            if (height > maxHeight) maxHeight = height;
+                        });
+                        comparisons.forEach(comparison => {
+                            comparison.style.height = `${maxHeight}px`;
+                        });
+                    }
+                }
+
+                if (images.length === 0) {
+                    // Нет изображений — можно сразу считать высоту
+                    comparisons.forEach(comparison => {
+                        const height = comparison.offsetHeight;
+                        if (height > maxHeight) maxHeight = height;
+                    });
+                    comparisons.forEach(comparison => {
+                        comparison.style.height = `${maxHeight}px`;
+                    });
+                    return;
+                }
+
+                images.forEach(img => {
+                    if (img.complete) {
+                        imagesLoaded++;
+                        checkImagesLoaded();
+                    } else {
+                        img.addEventListener('load', () => {
+                            imagesLoaded++;
+                            checkImagesLoaded();
+                        });
+                    }
+                });
+            }
+
+            // Первичный запуск после загрузки страницы
+            window.addEventListener('load', function() {
+                setTimeout(equalizeComparisonHeights, 300);
+            });
+
+            // Также на ресайз
+            window.addEventListener('resize', equalizeComparisonHeights);
         });
     </script>
+
+    @auth
+        @if (auth()->user()->role === 'admin')
+            <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Инициализация сортировки преимуществ
+                    const sortableAdvantages = new Sortable(document.getElementById('sortable-advantages'), {
+                        animation: 150,
+                        handle: '.drag-handle',
+                        ghostClass: 'sortable-ghost',
+                        onEnd: function() {
+                            updateAdvantagesOrder();
+                        }
+                    });
+
+                    // Функция обновления порядка преимуществ
+                    function updateAdvantagesOrder() {
+                        const advantageItems = document.querySelectorAll('#sortable-advantages .products__advantage');
+                        const order = Array.from(advantageItems).map((item, index) => ({
+                            id: item.dataset.advantageId,
+                            position: index + 1
+                        }));
+
+                        fetch('{{ route('admin.products.advantages.order', $product->id) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json' // Явно указываем, что ожидаем JSON
+                                },
+                                body: JSON.stringify({
+                                    order: order
+                                }),
+                                credentials: 'same-origin'
+                            })
+                            .then(async response => {
+                                // Проверяем Content-Type ответа
+                                const contentType = response.headers.get('content-type');
+                                if (!contentType || !contentType.includes('application/json')) {
+                                    const text = await response.text();
+                                    throw new Error(`Ожидался JSON, но получен: ${text.substring(0, 100)}...`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data && data.success) {
+                                    showNotification('Порядок преимуществ успешно обновлён', 'success');
+                                } else {
+                                    throw new Error(data.message || 'Неизвестная ошибка сервера');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                showNotification('Ошибка сохранения порядка: ' + error.message, 'error');
+                                // Восстановление исходного порядка при ошибке
+                                sortableAdvantages.sort(Array.from(advantageItems).map(item => item.dataset
+                                    .advantageId));
+                            });
+                    }
+                });
+            </script>
+
+            <style>
+                .sortable-ghost {
+                    opacity: 0.5;
+                    background: #f8f9fa;
+                    border: 2px dashed #dee2e6;
+                }
+
+                .products__advantage {
+                    position: relative;
+                }
+
+                .drag-handle {
+                    position: absolute;
+                    top: 10px;
+                    right: 40px;
+                    cursor: move;
+                    font-size: 20px;
+                    color: #dc3545;
+                }
+
+                .edit-btn {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    cursor: pointer;
+                    font-size: 20px;
+                    color: #dc3545;
+                    text-decoration: none;
+                }
+
+                .advantage-admin-controls {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                }
+            </style>
+        @endif
+    @endauth
 @endsection

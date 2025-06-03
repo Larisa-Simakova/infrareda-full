@@ -184,7 +184,7 @@
                             <div class="products__description">
                                 <p class="text-main">{{ $product->title }}</p>
                                 <div class="text-small">
-                                    {{ strtok(strip_tags(html_entity_decode($product->description)), '.') }}
+                                    {{ strtok(strip_tags(html_entity_decode($product->short_description)), '.') }}
                                 </div>
                             </div>
                             <img src="{{ secure_asset('storage/' . $product->images->first()->url) }}" alt="">

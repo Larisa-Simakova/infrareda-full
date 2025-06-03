@@ -9,7 +9,7 @@
         @endif
         <input type="hidden" name="step" value="description">
 
-        <h2>{{ $product ? 'Редактирование товара' : 'Добавление товара' }}</h2>
+        <h2>{{ $product ? 'Редактирование товара: ' . $product->title : 'Добавление товара' }}</h2>
         <div class="form-inputs">
             <div class="form-input">
                 <label for="title" class="text-medium">Название товара <span style="color: red;">*</span></label>

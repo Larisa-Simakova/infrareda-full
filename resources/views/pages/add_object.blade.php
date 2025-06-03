@@ -176,7 +176,7 @@
                 }
             });
 
-            initFroalaEditor('#editor', '{{ route('object.image.description.upload') }}');
+            initFroalaEditor('#editor');
 
             setupImageUpload('objectImageUpload', 'objectImages',
                 '{{ route('object.image.upload') }}',

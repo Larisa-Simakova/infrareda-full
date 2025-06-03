@@ -84,33 +84,35 @@
             </div>
 
             <!-- Встроенная пагинация с сохранением фильтра -->
-            @if ($objects->total() > 0)
-                <div class="pagination">
-                    @if ($objects->onFirstPage())
-                        <span class="pagination-arrow disabled">
-                            << /span>
-                            @else
-                                <a href="{{ $objects->appends(request()->except('page'))->previousPageUrl() }}"
-                                    class="pagination-arrow">
-                                    << /a>
-                    @endif
-
-                    @foreach ($objects->getUrlRange(1, $objects->lastPage()) as $page => $url)
-                        @if ($page == $objects->currentPage())
-                            <span class="current-page">{{ $page }}</span>
+            @if ($objects->hasPages())
+                @if ($objects->total() > 0)
+                    <div class="pagination">
+                        @if ($objects->onFirstPage())
+                            <span class="pagination-arrow disabled">
+                                &lt;</span>
                         @else
-                            <a
-                                href="{{ $objects->appends(request()->except('page'))->url($page) }}">{{ $page }}</a>
+                            <a href="{{ $objects->appends(request()->except('page'))->previousPageUrl() }}"
+                                class="pagination-arrow">
+                                &lt;</a>
                         @endif
-                    @endforeach
 
-                    @if ($objects->hasMorePages())
-                        <a href="{{ $objects->appends(request()->except('page'))->nextPageUrl() }}"
-                            class="pagination-arrow">></a>
-                    @else
-                        <span class="pagination-arrow disabled">></span>
-                    @endif
-                </div>
+                        @foreach ($objects->getUrlRange(1, $objects->lastPage()) as $page => $url)
+                            @if ($page == $objects->currentPage())
+                                <span class="current-page">{{ $page }}</span>
+                            @else
+                                <a
+                                    href="{{ $objects->appends(request()->except('page'))->url($page) }}">{{ $page }}</a>
+                            @endif
+                        @endforeach
+
+                        @if ($objects->hasMorePages())
+                            <a href="{{ $objects->appends(request()->except('page'))->nextPageUrl() }}"
+                                class="pagination-arrow">&gt;</a>
+                        @else
+                            <span class="pagination-arrow disabled">&gt;</span>
+                        @endif
+                    </div>
+                @endif
             @endif
         </div>
     </section>

@@ -5,21 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Certificate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Spatie\PdfToImage\Pdf;
+
 
 class ProductCertificateController extends Controller
 {
+
     public function tempUploadCertificate(Request $request)
     {
         $validated = $request->validate([
             'files' => 'required|array|min:1',
-            'files.*' => 'required|mimes:pdf|max:10240', // 10MB max для PDF
-            'file_type' => 'sometimes|in:certificate' // Можно расширить при необходимости
-        ], [
-            'files.required' => 'Необходимо загрузить хотя бы один файл',
-            'files.*.mimes' => 'Допустимый формат: PDF',
-            'files.*.max' => 'Максимальный размер файла: 10MB',
+            'files.*' => 'required|mimes:pdf,png,jpeg,jpg,svg,png,webp|max:10240',
+            'file_type' => 'sometimes|in:certificate'
         ]);
 
         $fileType = $request->file_type ?? 'certificate';
@@ -29,13 +29,40 @@ class ProductCertificateController extends Controller
 
         foreach ($request->file('files') as $file) {
             $tempId = Str::uuid()->toString();
-            $path = $file->store("temp/{$fileType}", 'public');
+            $originalName = $file->getClientOriginalName();
 
-            $tempFiles[$tempId] = $path;
+            // Сохраняем с оригинальным именем во временной папке
+            $path = $file->storeAs("temp/{$fileType}", $originalName, 'public');
+
+            $previewUrl = null;
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            // Если это PDF - создаем превью
+            if ($extension === 'pdf') {
+                try {
+                    $pdf = new Pdf(storage_path('app/public/' . $path));
+                    $previewPath = "temp/{$fileType}/preview_" . pathinfo($originalName, PATHINFO_FILENAME) . '.jpg';
+                    $pdf->setPage(1)->saveImage(storage_path('app/public/' . $previewPath));
+                    $previewUrl = asset('storage/' . $previewPath);
+                } catch (\Exception $e) {
+                    $previewUrl = null;
+                }
+            } else {
+                $previewUrl = asset('storage/' . $path);
+            }
+
+            $tempFiles[$tempId] = [
+                'path' => $path,
+                'preview' => $previewUrl,
+                'original_name' => $originalName
+            ];
+
             $uploadedFiles[] = [
                 'temp_id' => $tempId,
-                'name' => $file->getClientOriginalName(),
-                'url' => secure_asset('storage/' . $path),
+                'name' => $originalName,
+                'url' => asset('storage/' . $path),
+                'preview_url' => $previewUrl,
+                'is_pdf' => $extension === 'pdf',
                 'size' => $file->getSize()
             ];
         }
@@ -46,6 +73,47 @@ class ProductCertificateController extends Controller
             'success' => true,
             'files' => $uploadedFiles
         ]);
+    }
+
+    private function processCertificateFile(Product $product, $tempId, $tempFiles)
+    {
+        if (isset($tempFiles[$tempId])) {
+            $oldPath = $tempFiles[$tempId]['path'];
+            $originalName = $tempFiles[$tempId]['original_name'];
+
+            // Формируем конечный путь с оригинальным именем
+            $newPath = 'products/' . $product->id . '/certificates/' . $originalName;
+
+            // Проверяем существование файла и добавляем суффикс при необходимости
+            $counter = 1;
+            while (Storage::disk('public')->exists($newPath)) {
+                $info = pathinfo($originalName);
+                $newPath = 'products/' . $product->id . '/certificates/' .
+                    $info['filename'] . '_' . $counter . '.' . $info['extension'];
+                $counter++;
+            }
+
+            Storage::disk('public')->makeDirectory('products/' . $product->id . '/certificates');
+            Storage::disk('public')->move($oldPath, $newPath);
+
+            // Если это PDF - создаем превью
+            $extension = strtolower(pathinfo($newPath, PATHINFO_EXTENSION));
+            if ($extension === 'pdf') {
+                try {
+                    $pdf = new Pdf(storage_path('app/public/' . $newPath));
+                    $previewPath = 'products/' . $product->id . '/certificates/' .
+                        pathinfo($newPath, PATHINFO_FILENAME) . '_preview.jpg';
+                    $pdf->setPage(1)->saveImage(storage_path('app/public/' . $previewPath));
+                } catch (\Exception $e) {
+                    Log::error('Failed to create PDF preview: ' . $e->getMessage());
+                }
+            }
+
+            Certificate::create([
+                'product_id' => $product->id,
+                'url' => $newPath // Сохраняем путь с оригинальным именем
+            ]);
+        }
     }
 
     public function tempDeleteCertificate(Request $request)
@@ -113,23 +181,6 @@ class ProductCertificateController extends Controller
 
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Ошибка сохранения сертификатов: ' . $e->getMessage());
-        }
-    }
-
-    private function processCertificateFile(Product $product, $tempId, $tempFiles)
-    {
-        if (isset($tempFiles[$tempId])) {
-            $oldPath = $tempFiles[$tempId];
-            $extension = pathinfo($oldPath, PATHINFO_EXTENSION);
-            $newPath = 'products/' . $product->id . '/certificates/' . Str::random(40) . '.' . $extension;
-
-            Storage::disk('public')->makeDirectory('products/' . $product->id . '/certificates');
-            Storage::disk('public')->move($oldPath, $newPath);
-
-            Certificate::create([
-                'product_id' => $product->id,
-                'url' => $newPath
-            ]);
         }
     }
 

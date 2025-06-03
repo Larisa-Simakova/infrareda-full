@@ -21,15 +21,14 @@
                     </span>
                 </a>
             </div>
-            <div class="catalog__items">
+            <div class="catalog__items" id="sortable-products">
                 @forelse ($products as $product)
                     <div class="catalog__item" data-product-id="{{ $product->id }}">
                         <div class="catalog__item__content">
                             <div class="catalog__item__description">
                                 <p class="text-main">{{ $product->title }}</p>
-
                                 <div class="text-small">
-                                    {{ strtok(strip_tags(html_entity_decode($product->description)), '.') }}
+                                    {!! $product->short_description !!}
                                 </div>
                             </div>
                             <div class="catalog__item__buttons">
@@ -48,7 +47,7 @@
                                             </svg>
                                         </span>
                                     </a>
-                                    <button class="button-transparent">удалить</button>
+                                    <button class="button-transparent delete-product">удалить</button>
                                 </div>
                             </div>
                         </div>
@@ -64,8 +63,7 @@
         <div id="deleteModal" class="modal">
             <div class="modal-content">
                 <p class="text-main" id="modalTitle">Вы действительно хотите удалить товар "<span
-                        id="productTitle"></span>"?
-                </p>
+                        id="productTitle"></span>"?</p>
                 <div class="modal-buttons">
                     <button id="confirmDelete" class="button-transparent">Да, удалить</button>
                     <button id="cancelDelete" class="button-red">Отмена</button>
@@ -73,9 +71,57 @@
             </div>
         </div>
     </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const deleteButtons = document.querySelectorAll('.catalog__item__buttons .button-transparent');
+            // Инициализация сортировки
+            const sortable = new Sortable(document.getElementById('sortable-products'), {
+                animation: 150,
+                handle: '.catalog__item',
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                dragClass: 'sortable-drag',
+                onEnd: function() {
+                    saveNewOrder();
+                }
+            });
+
+            // Функция сохранения нового порядка
+            function saveNewOrder() {
+                const productItems = document.querySelectorAll('.catalog__item');
+                const order = Array.from(productItems).map((item, index) => ({
+                    id: item.dataset.productId,
+                    position: index + 1
+                }));
+
+                fetch('{{ route('admin.products.update-order') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            order: order
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification('Порядок товаров успешно сохранён', 'success');
+                        } else {
+                            showNotification('Ошибка при сохранении порядка', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Ошибка при сохранении порядка', 'error');
+                    });
+            }
+
+            // Управление модальным окном удаления
+            const deleteButtons = document.querySelectorAll('.delete-product');
             const modal = document.getElementById('deleteModal');
             const productTitleSpan = document.getElementById('productTitle');
             const confirmBtn = document.getElementById('confirmDelete');
@@ -139,12 +185,12 @@
                                     window.location.reload();
                                 }, 1000);
                             } else {
-                                showNotification(data.message || 'Не удалось удалить объект', 'error');
+                                showNotification(data.message || 'Не удалось удалить товар', 'error');
                             }
                         })
                         .catch(error => {
                             console.error('Ошибка:', error);
-                            alert('Не удалось удалить объект');
+                            showNotification('Не удалось удалить товар', 'error');
                         })
                         .finally(() => {
                             closeModal();
@@ -161,4 +207,31 @@
             });
         });
     </script>
+
+    <style>
+        /* Стили для сортировки */
+        .sortable-ghost {
+            opacity: 0.5;
+            background: #f0f0f0;
+            border: 1px dashed #ccc;
+        }
+
+        .sortable-chosen {
+            cursor: grabbing;
+        }
+
+        .sortable-drag {
+            opacity: 1;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .catalog__item {
+            cursor: grab;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .catalog__item:active {
+            cursor: grabbing;
+        }
+    </style>
 @endsection

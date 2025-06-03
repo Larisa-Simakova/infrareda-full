@@ -30,7 +30,7 @@ class AdminController extends Controller
 
     public function showAdmin(Request $request)
     {
-        $products = Product::all();
+        $products = Product::orderBy('order')->get();
         return view('pages.admin', compact('products'));
     }
 

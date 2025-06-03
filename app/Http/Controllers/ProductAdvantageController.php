@@ -6,6 +6,8 @@ use App\Models\Product;
 use App\Models\Advantage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+
 
 class ProductAdvantageController extends Controller
 {
@@ -65,7 +67,7 @@ class ProductAdvantageController extends Controller
                     }
                     // Проверяем существующее изображение
                     elseif (!empty($advantage['img'])) {
-                        $imagePath = str_replace(secure_asset('storage/'), '', $advantage['img']);
+                        $imagePath = str_replace(asset('storage/'), '', $advantage['img']);
                     }
 
                     Advantage::create([
@@ -74,7 +76,8 @@ class ProductAdvantageController extends Controller
                         'traditional_description' => $advantage['traditional_description'],
                         'infrared_description' => $advantage['infrared_description'],
                         'img' => $imagePath,
-                        'product_id' => $product->id
+                        'product_id' => $product->id,
+                        'order' => $advantage['order'] ?? $index,
                     ]);
                 }
             }
@@ -95,6 +98,39 @@ class ProductAdvantageController extends Controller
                     ]);
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Ошибка при сохранении: ' . $e->getMessage());
+        }
+    }
+
+    public function updateOrder(Product $product, Request $request)
+    {
+
+        $request->validate([
+            'order' => 'required|array',
+            'order.*.id' => [
+                'required',
+            ],
+            'order.*.position' => 'required|integer|min:1'
+        ]);
+
+        try {
+            DB::transaction(function () use ($product, $request) {
+                foreach ($request->order as $item) {
+                    $product->advantages()
+                        ->where('id', $item['id'])
+                        ->update(['order' => $item['position']]);
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Порядок успешно обновлён'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ошибка сервера: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

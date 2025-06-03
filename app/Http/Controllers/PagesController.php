@@ -12,8 +12,8 @@ class PagesController extends Controller
     public function showMain(Request $request)
     {
         $products_objects = Product::all();
-        $objects = Project::all();
-        $products = Product::orderBy('id', 'desc')->limit(5)->get();
+        $objects = Project::orderBy('date', 'desc')->get();
+        $products = Product::orderBy('created_at', 'asc')->limit(5)->get();
         $latestBlog = Blog::orderBy('date', 'desc')->first();
         $recentBlogs = Blog::where('id', '!=', $latestBlog->id)
             ->orderBy('date', 'desc')
@@ -35,7 +35,7 @@ class PagesController extends Controller
         $objects = $query->get()->map(function ($project) {
             return [
                 'title' => $project->title,
-                'image_url' => secure_asset('storage/' . $project->images->first()->url),
+                'image_url' => asset('storage/' . $project->images->first()->url),
                 'place' => $project->place,
                 'date' => $project->date ? $project->date->format('Y-m-d') : null
             ];

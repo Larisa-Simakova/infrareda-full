@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\FroalaController;
 use App\Http\Controllers\ObjectController;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\ProductAdvantageController;
@@ -12,7 +13,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductFaqController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\ProductUsageController;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -105,7 +105,6 @@ Route::middleware('admin.check')->group(function () {
 
         // Маршруты для изображений преимуществ
         Route::post('/advantages/images/temp-upload', [ProductImageController::class, 'tempUploadImage'])->name('advantages.images.temp-upload');
-        Route::post('/advantages/images/temp-delete', [ProductImageController::class, 'tempDeleteImage'])->name('advantages.images.temp-delete');
         Route::delete('/advantages/images/{image}', [ProductAdvantageController::class, 'destroyImage'])->name('advantages.images.destroy');
 
         // Маршруты для сертификатов
@@ -122,6 +121,10 @@ Route::middleware('admin.check')->group(function () {
 
         Route::post('/certificates/temp-delete', [ProductCertificateController::class, 'tempDeleteCertificate'])
             ->name('certificates.temp-delete');
+
+
+        Route::post('/{product}/advantages/order', [ProductAdvantageController::class, 'updateOrder'])->name('advantages.order');
+        Route::post('/update-order', [ProductController::class, 'updateOrder'])->name('update-order');
     });
 
     Route::post('/temp-upload-object-image', [ProductImageController::class, 'tempUploadImage']);
@@ -129,6 +132,9 @@ Route::middleware('admin.check')->group(function () {
 
     Route::post('/temp-upload-blog-image', [ProductImageController::class, 'tempUploadImage']);
     Route::post('/temp-delete-blog-image', [ProductImageController::class, 'tempDeleteImage']);
+
+    Route::post('/upload_image', [FroalaController::class, 'upload'])->name('upload_image');
+    Route::post('/delete_image', [FroalaController::class, 'delete'])->name('delete_image');
 });
 
 Route::get('/objects/filter', [PagesController::class, 'filterObjects'])->name('objects.filter');
@@ -142,49 +148,3 @@ Route::get('/objects', [ObjectController::class, 'showObjects'])->name('view.obj
 Route::get('/object/{id}', [ObjectController::class, 'showObject'])->name('view.object');
 Route::get('/admin', [AdminController::class, 'showLogin'])->name('view.login');
 Route::post('/login/store', [AdminController::class, 'login'])->name('login');
-Route::post('/froala-upload', [ProductImageController::class, 'uploadFroalaImage'])
-    ->name('admin.froala.upload')
-    ->middleware(['auth']);
-Route::get('/migrate', function () {
-    Artisan::call('migrate', ['--force' => true]);
-    return 'Migrations completed!';
-});
-Route::get('/logs', function () {
-    $logPath = storage_path('logs/laravel.log');
-    if (file_exists($logPath)) {
-        return "<pre>" . file_get_contents($logPath) . "</pre>";
-    }
-    return "Log file not found.";
-});
-Route::get('/check-log', function () {
-    $logPath = storage_path('logs/laravel.log');
-
-    if (file_exists($logPath)) {
-        return 'Log file exists';
-    } else {
-        // Создаем файл вручную
-        touch($logPath);
-        chmod($logPath, 0777);
-        return 'Log file created';
-    }
-});
-Route::get('/seed-logs', function () {
-    $logPath = storage_path('logs/laravel.log');
-    if (!file_exists($logPath)) {
-        return 'Log file not found.';
-    }
-    $logContent = file_get_contents($logPath);
-    $filteredLogs = preg_grep('/Seeder/', explode("\n", $logContent));
-    return "<pre>" . implode("\n", $filteredLogs) . "</pre>";
-});
-Route::get('/seed', function () {
-    Artisan::call('db:seed');
-    return 'Seeded!';
-});
-Route::get('/check-storage-link', function () {
-    if (file_exists(public_path('storage'))) {
-        return 'Ссылка на storage существует';
-    } else {
-        return 'Ссылка на storage НЕ создана';
-    }
-});

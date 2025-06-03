@@ -30,7 +30,7 @@
                     @foreach ($advantages as $index => $advantage)
                         <div class="advantage-item item" data-index="{{ $index }}">
                             <div class="form-input">
-                                <label class="text-medium" for="advantage-title-{{ $index }}">Заголовок
+                                <label class="text-medium">Заголовок
                                     преимущества <span style="color: red;">*</span></label>
                                 <input type="text" id="advantage-title-{{ $index }}"
                                     name="advantages[{{ $index }}][title]" class="input-white"
@@ -38,23 +38,23 @@
                             </div>
 
                             <div class="form-input">
-                                <label class="text-medium" for="advantage-description-{{ $index }}">Описание
+                                <label class="text-medium">Описание
                                     преимущества <span style="color: red;">*</span></label>
-                                <textarea id="editor" name="advantages[{{ $index }}][description]" class="input-white"
+                                <textarea name="advantages[{{ $index }}][description]" class="input-white froala-editor"
                                     placeholder="Подробное описание преимущества">{{ $advantage['description'] ?? '' }}</textarea>
                             </div>
 
                             <div class="form-input">
-                                <label class="text-medium" for="advantage-traditional-{{ $index }}">Описание для
+                                <label class="text-medium">Описание для
                                     традиционного отопления <span style="color: red;">*</span></label>
-                                <textarea id="editor" name="advantages[{{ $index }}][traditional_description]" class="input-white"
+                                <textarea name="advantages[{{ $index }}][traditional_description]" class="input-white froala-editor"
                                     placeholder="Описание для традиционного отопления">{{ $advantage['traditional_description'] ?? '' }}</textarea>
                             </div>
 
                             <div class="form-input">
-                                <label class="text-medium" for="advantage-infrared-{{ $index }}">Описание для
+                                <label class="text-medium">Описание для
                                     инфракрасного отопления <span style="color: red;">*</span></label>
-                                <textarea id="editor" name="advantages[{{ $index }}][infrared_description]" class="input-white"
+                                <textarea name="advantages[{{ $index }}][infrared_description]" class="input-white froala-editor"
                                     placeholder="Описание для инфракрасного отопления">{{ $advantage['infrared_description'] ?? '' }}</textarea>
                             </div>
 
@@ -86,6 +86,10 @@
                                 @endif
                                 <div class="error-container"></div>
                             </div>
+                            <div class="form-input d-none">
+                                <input type="hidden" name="advantages[{{ $index }}][order]"
+                                    class="advantage-order-input" value="{{ $advantage['order'] ?? $loop->index }}">
+                            </div>
 
                             <button type="button" class="button-transparent remove-item">Удалить преимущество</button>
                         </div>
@@ -103,9 +107,37 @@
         </div>
     </form>
 
-    <script>
+<script>
         document.addEventListener('DOMContentLoaded', function() {
-            initFroalaEditor('#editor', '{{ route('admin.products.images.upload') }}');
+            new Sortable(document.getElementById('advantages-container'), {
+                animation: 150,
+                handle: '.advantage-item',
+                onEnd: function(evt) {
+                    updateOrderIndexes();
+                }
+            });
+
+            function updateOrderIndexes() {
+                const items = document.querySelectorAll('.advantage-item');
+                items.forEach((item, index) => {
+                    item.dataset.index = index;
+                    const inputs = item.querySelectorAll('input, textarea, select');
+                    inputs.forEach(input => {
+                        const name = input.name.replace(/advantages\[\d+\]/,
+                            `advantages[${index}]`);
+                        input.name = name;
+                    });
+                    const orderInput = item.querySelector('.advantage-order-input');
+                    if (orderInput) {
+                        orderInput.value = index;
+                    }
+                });
+            }
+
+            setTimeout(() => {
+                const editors = initFroalaEditor('.froala-editor',
+                    '{{ route('admin.products.images.upload') }}');
+            }, 300);
             const advantagesContainer = document.getElementById('advantages-container');
             const uploadRoute = '{{ route('admin.products.advantages.images.temp-upload') }}';
 
@@ -247,38 +279,38 @@
 
                 div.innerHTML = `
                     <div class="form-input">
-                        <label class="text-medium" for="advantage-title-${newIndex}">Заголовок преимущества <span style="color: red;">*</span> </label>
+                        <label class="text-medium">Заголовок преимущества <span style="color: red;">*</span> </label>
                         <input type="text" id="editor" name="advantages[${newIndex}][title]"
                                class="input-white" value="${data.title || ''}"
                                placeholder="Например: Энергоэффективность">
                     </div>
 
                     <div class="form-input">
-                        <label class="text-medium" for="advantage-description-${newIndex}">Описание преимущества <span style="color: red;">*</span> </label>
-                        <textarea id="editor" name="advantages[${newIndex}][description]"
-                                  class="input-white" placeholder="Подробное описание преимущества">${data.description || ''}</textarea>
+                        <label class="text-medium">Описание преимущества <span style="color: red;">*</span> </label>
+                        <textarea name="advantages[${newIndex}][description]"
+                                  class="input-white froala-editor" placeholder="Подробное описание преимущества">${data.description || ''}</textarea>
                     </div>
 
                     <div class="form-input">
-                        <label class="text-medium" for="advantage-traditional-${newIndex}">Описание для традиционного отопления <span style="color: red;">*</span> </label>
-                        <textarea id="editor" name="advantages[${newIndex}][traditional_description]"
-                                  class="input-white" placeholder="Описание для традиционного отопления">${data.traditional_description || ''}</textarea>
+                        <label class="text-medium">Описание для традиционного отопления <span style="color: red;">*</span> </label>
+                        <textarea name="advantages[${newIndex}][traditional_description]"
+                                  class="input-white froala-editor" placeholder="Описание для традиционного отопления">${data.traditional_description || ''}</textarea>
                     </div>
 
                     <div class="form-input">
-                        <label class="text-medium" for="advantage-infrared-${newIndex}">Описание для инфракрасного отопления <span style="color: red;">*</span> </label>
-                        <textarea id="editor" name="advantages[${newIndex}][infrared_description]"
-                                  class="input-white" placeholder="Описание для инфракрасного отопления">${data.infrared_description || ''}</textarea>
+                        <label class="text-medium">Описание для инфракрасного отопления <span style="color: red;">*</span> </label>
+                        <textarea name="advantages[${newIndex}][infrared_description]"
+                                  class="input-white froala-editor" placeholder="Описание для инфракрасного отопления">${data.infrared_description || ''}</textarea>
                     </div>
 
                     <div class="form-input image-upload-container">
                         <div class="image-preview-container" id="advantage-image-preview-${newIndex}">
                             ${data.img ? `
-                                                                                <div class="image-block">
-                                                                                    <img src="${data.img}" alt="Preview">
-                                                                                    <input type="hidden" name="advantages[${newIndex}][img]" value="${data.img}">
-                                                                                </div>
-                                                                            ` : ''}
+                                                                                                                                                                    <div class="image-block">
+                                                                                                                                                                        <img src="${data.img}" alt="Preview">
+                                                                                                                                                                        <input type="hidden" name="advantages[${newIndex}][img]" value="${data.img}">
+                                                                                                                                                                    </div>
+                                                                                                                                                                ` : ''}
                         </div>
 
                         <label class="button-red">
@@ -289,6 +321,10 @@
                         </label>
                         <div class="error-container"></div>
                     </div>
+
+                    <div class="form-input d-none">
+    <input type="hidden" name="advantages[${newIndex}][order]" class="advantage-order-input" value="${newIndex}">
+</div>
 
                     <button type="button" class="button-transparent remove-item">Удалить преимущество</button>
                 `;
@@ -311,40 +347,134 @@
             // Удаление преимущества
             document.addEventListener('click', function(e) {
                 if (e.target.classList.contains('remove-item')) {
-                    const items = advantagesContainer.querySelectorAll('.advantage-item');
+                    const item = e.target.closest('.advantage-item');
+                    const container = document.getElementById('advantages-container');
+                    const items = container.querySelectorAll('.advantage-item');
 
                     if (items.length === 1) {
-                        // Если удаляется последнее поле - очищаем его вместо удаления
-                        const inputs = items[0].querySelectorAll('input, textarea');
-                        inputs.forEach(input => {
-                            if (input.type !== 'hidden') {
-                                input.value = '';
+                        const index = item.dataset.index;
+
+                        console.groupCollapsed('[DEBUG] Состояние перед очисткой (index: ' + index + ')');
+                        ['description', 'traditional_description', 'infrared_description'].forEach(
+                            field => {
+                                const textarea = item.querySelector(
+                                    `textarea[name="advantages[${index}][${field}]"]`);
+                                console.log('Редактор ' + field + ':', {
+                                    element: textarea,
+                                    value: textarea.value,
+                                    froalaInstance: window.froalaEditorInstances ?
+                                        window.froalaEditorInstances[textarea.id || textarea
+                                            .name] : 'не найден',
+                                    html: textarea.innerHTML
+                                });
+                            });
+                        console.groupEnd();
+
+                        // 1. Очищаем обычные поля
+                        item.querySelector(`input[name="advantages[${index}][title]"]`).value = '';
+
+                        // 2. Особенная очистка Froala редакторов
+                        const clearFroalaEditor = (textarea) => {
+                            if (!textarea) return;
+
+                            // 1. Попытка очистки через API Froala
+                            if (textarea.froalaEditor) {
+                                textarea.froalaEditor('html.set', '');
+                                return;
+                            }
+
+                            // 2. Если API недоступно - принудительная очистка
+                            textarea.value = '';
+                            const froalaWrapper = textarea.closest('.fr-wrapper');
+                            if (froalaWrapper) {
+                                froalaWrapper.querySelector('.fr-element').innerHTML = '';
+                            }
+                        };
+
+                        // Очищаем все три редактора
+                        clearFroalaEditor(item.querySelector(
+                            `textarea[name="advantages[${index}][description]"]`));
+                        clearFroalaEditor(item.querySelector(
+                            `textarea[name="advantages[${index}][traditional_description]"]`));
+                        clearFroalaEditor(item.querySelector(
+                            `textarea[name="advantages[${index}][infrared_description]"]`));
+
+                        // 4. ОТЛАДКА ПОСЛЕ ОЧИСТКИ - проверяем результат
+                        console.groupCollapsed('[DEBUG] Состояние после очистки (index: ' + index + ')');
+                        ['description', 'traditional_description', 'infrared_description'].forEach(
+                            field => {
+                                const textarea = item.querySelector(
+                                    `textarea[name="advantages[${index}][${field}]"]`);
+                                console.log('Редактор ' + field + ' после очистки:', {
+                                    value: textarea.value,
+                                    html: textarea.innerHTML
+                                });
+                            });
+                        console.groupEnd();
+
+
+                        // 3. Очищаем изображение
+                        const previewContainer = item.querySelector('.image-preview-container');
+                        previewContainer.innerHTML = '';
+
+                        // 4. Удаляем все связанные скрытые поля
+                        item.querySelectorAll('input[type="hidden"]').forEach(input => {
+                            // Не удаляем поле _token если оно есть
+                            if (input.name !== '_token') {
+                                input.remove();
                             }
                         });
 
-                        // Удаляем иконку
-                        const previewContainer = items[0].querySelector('.image-preview-container');
-                        previewContainer.innerHTML = '';
-
-                        // Обновляем кнопку загрузки
-                        const container = items[0].querySelector('.image-upload-container');
+                        // 5. Восстанавливаем кнопку загрузки изображения
+                        const imageUploadContainer = item.querySelector('.image-upload-container');
+                        const oldLabel = imageUploadContainer.querySelector('label');
                         const newLabel = document.createElement('label');
                         newLabel.className = 'button-red';
                         newLabel.innerHTML = `
-                            Загрузить иконку
-                            <input type="file" name="advantages[0][image]"
-                                id="advantage-image-upload-0"
-                                class="visually-hidden" accept="image/*">
-                        `;
-                        container.replaceChild(newLabel, container.querySelector('label'));
+                Загрузить иконку
+                <input type="file" name="advantages[${index}][image]"
+                       id="advantage-image-upload-${index}"
+                       class="visually-hidden" accept="image/*">
+            `;
+                        imageUploadContainer.replaceChild(newLabel, oldLabel);
 
-                        // Назначаем обработчик
+                        // 6. Назначаем обработчик для новой кнопки
                         newLabel.querySelector('input').addEventListener('change', function() {
-                            handleImageUpload(this, 'advantage-image-preview-0', 0);
+                            handleImageUpload(this, `advantage-image-preview-${index}`, index);
                         });
+
+                        // 7. Очищаем сообщения об ошибках
+                        item.querySelectorAll('.error-container').forEach(container => {
+                            container.textContent = '';
+                        });
+
+                        // 8. Важное дополнение: принудительно триггерим событие изменения
+                        ['description', 'traditional_description', 'infrared_description'].forEach(
+                            field => {
+                                const textarea = item.querySelector(
+                                    `textarea[name="advantages[${index}][${field}]"]`);
+                                if (textarea) {
+                                    const event = new Event('input', {
+                                        bubbles: true
+                                    });
+                                    textarea.dispatchEvent(event);
+                                }
+                            });
+
                     } else {
                         if (confirm('Вы уверены, что хотите удалить это преимущество?')) {
-                            e.target.closest('.advantage-item').remove();
+                            // При полном удалении сначала уничтожаем редакторы
+                            item.querySelectorAll('textarea.froala-editor').forEach(textarea => {
+                                const editorId = textarea.id || textarea.name || Math.random()
+                                    .toString(36).substr(2, 9);
+                                if (window.froalaEditorInstances && window.froalaEditorInstances[
+                                        editorId]) {
+                                    window.froalaEditorInstances[editorId].destroy();
+                                    delete window.froalaEditorInstances[editorId];
+                                }
+                            });
+                            item.remove();
+                            updateOrderIndexes();
                         }
                     }
                 }

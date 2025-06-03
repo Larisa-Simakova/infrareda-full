@@ -5,6 +5,31 @@ document.addEventListener('DOMContentLoaded', function () {
         const swiperId = container.id || 'swiper-' + Math.random().toString(36).substr(2, 9);
         container.dataset.swiperId = swiperId;
 
+        // Получаем параметры из конфига
+        const slides = container.querySelectorAll('.swiper-slide');
+        const slidesCount = slides.length;
+
+        // Определяем количество слайдов, при котором слайдер не нужен
+        const isDesktop = window.matchMedia('(min-width: 1036px)').matches;
+        const isMobile = window.matchMedia('(max-width: 633px)').matches;
+
+        let maxSlidesToShow = 3; // по умолчанию для desktop
+        if (isMobile) maxSlidesToShow = 1;
+        else if (!isDesktop) maxSlidesToShow = 2; // tablet
+
+        const shouldShowSlider = slidesCount > maxSlidesToShow;
+
+        // Если не нужно — скрываем слайдер и отображаем карточки как сетку
+        if (!shouldShowSlider) {
+            const paginationEl = container.querySelector('.custom-pagination');
+            if (paginationEl) paginationEl.style.display = 'none';
+
+            // Добавляем класс для стилизации без слайдера
+            container.classList.add('no-slider');
+            return;
+        }
+
+        // Инициализируем Swiper только если нужно
         const swiper = new Swiper(container, {
             slidesPerView: 2,
             slidesPerGroup: 2,
@@ -25,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 320: { slidesPerView: 1, slidesPerGroup: 1 }
             },
             on: {
-                init: function () { startProgressAnimation(this) },
+                init: function () { startProgressAnimation(this); },
                 slideChange: function () {
                     resetProgressAnimation(this);
                     startProgressAnimation(this);
@@ -36,12 +61,10 @@ document.addEventListener('DOMContentLoaded', function () {
         swiperInstances[swiperId] = swiper;
     });
 
-    // Экспортируем функцию для доступа к Swiper-экземплярам
     window.getSwiperInstance = (container) => {
         return swiperInstances[container.dataset.swiperId];
     };
 
-    // Функции анимации прогресса
     function startProgressAnimation(swiper) {
         const bullets = swiper.pagination.bullets;
         const activeIndex = Math.floor(swiper.realIndex / swiper.params.slidesPerGroup);
@@ -66,7 +89,17 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    const slider = new Swiper('.swiper-container-img', {
+    const imageContainer = document.querySelector('.swiper-container-img');
+    if (!imageContainer) return;
+
+    const slides = imageContainer.querySelectorAll('.swiper-slide');
+    if (slides.length <= 1) {
+        const paginationEl = imageContainer.querySelector('.custom-pagination');
+        if (paginationEl) paginationEl.style.display = 'none';
+        return;
+    }
+
+    const slider = new Swiper(imageContainer, {
         slidesPerView: 1,
         slidesPerGroup: 1,
         spaceBetween: 0,
@@ -82,7 +115,6 @@ document.addEventListener('DOMContentLoaded', function () {
             type: 'bullets',
             clickable: true,
         },
-
 
         effect: 'fade',
         fadeEffect: {
@@ -124,12 +156,19 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Инициализация Choices с улучшенными настройками
-    const choices = new Choices('.js-choice', {
+    const selectElement = document.querySelector('.js-choice');
+
+    // Проверяем, существует ли элемент на странице
+    if (!selectElement) {
+        return; // Если нет — выходим из функции, чтобы не было ошибки
+    }
+
+    // Инициализация Choices
+    const choices = new Choices(selectElement, {
         searchEnabled: false,
         itemSelectText: '',
         shouldSort: false,
-        position: 'auto', // Автоматическое позиционирование dropdown
+        position: 'auto',
         classNames: {
             containerOuter: 'choices',
             containerInner: 'choices__inner',
@@ -142,8 +181,9 @@ document.addEventListener('DOMContentLoaded', function () {
             return {
                 item: (classNames, data) => {
                     return template(`
-                        <div class="${classNames.item} ${data.highlighted ? classNames.highlightedState : classNames.itemSelectable}"
-                            data-item data-id="${data.id}" data-value="${data.value}" ${data.active ? 'aria-selected="true"' : ''}
+                        <div class="${classNames.item} ${data.highlighted ? classNames.highlightedState : ''}"
+                            data-item data-id="${data.id}" data-value="${data.value}"
+                            ${data.active ? 'aria-selected="true"' : ''}
                             ${data.disabled ? 'aria-disabled="true"' : ''}>
                             ${data.label}
                         </div>
@@ -155,35 +195,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Функция для обновления ширины селекта
     function updateSelectWidth() {
-        const select = document.querySelector('.js-choice');
-        if (!select) return;
+        const selectedItem = selectElement.closest('.choices')?.querySelector('.choices__item');
+        if (!selectedItem) return;
 
-        const choicesContainer = select.closest('.choices');
-        const selectedItem = choicesContainer.querySelector('.choices__item');
+        const tempSpan = document.createElement('span');
+        tempSpan.style.visibility = 'hidden';
+        tempSpan.style.whiteSpace = 'nowrap';
+        tempSpan.style.position = 'absolute';
+        tempSpan.style.fontSize = window.getComputedStyle(selectedItem).fontSize;
+        tempSpan.style.fontFamily = window.getComputedStyle(selectedItem).fontFamily;
+        tempSpan.textContent = selectedItem.textContent;
 
-        if (selectedItem) {
-            // Создаем временный элемент для измерения текста
-            const tempSpan = document.createElement('span');
-            tempSpan.style.visibility = 'hidden';
-            tempSpan.style.whiteSpace = 'nowrap';
-            tempSpan.style.position = 'absolute';
-            tempSpan.style.fontSize = window.getComputedStyle(selectedItem).fontSize;
-            tempSpan.style.fontFamily = window.getComputedStyle(selectedItem).fontFamily;
-            tempSpan.textContent = selectedItem.textContent;
+        document.body.appendChild(tempSpan);
+        const textWidth = tempSpan.offsetWidth;
+        document.body.removeChild(tempSpan);
 
-            document.body.appendChild(tempSpan);
-            const textWidth = tempSpan.offsetWidth;
-            document.body.removeChild(tempSpan);
-
-            // Устанавливаем ширину с учетом padding и стрелки
-            const newWidth = Math.min(Math.max(textWidth + 60, 150), window.innerWidth - 40);
-            choicesContainer.style.width = `${newWidth}px`;
-        }
+        // Увеличили отступ до 80px для более широкого селекта
+        const newWidth = Math.min(Math.max(textWidth + 200, 300), window.innerWidth - 40);
+        selectElement.closest('.choices').style.width = `${newWidth}px`;
     }
 
-    // Обновляем при инициализации и изменении значения
+    // Вызываем при инициализации и изменении значения
     updateSelectWidth();
-    choices.passedElement.element.addEventListener('change', updateSelectWidth);
+    selectElement.addEventListener('change', updateSelectWidth);
 
     // Обновляем при ресайзе окна с debounce
     let resizeTimeout;
@@ -323,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('callbackModal');
     const openModalBtnHeader = document.querySelector('.header .button-red'); // Кнопка в шапке
     const openModalBtnFooter = document.querySelector('.footer .button-red'); // Кнопка в подвале
-    const closeModalBtn = document.querySelector('.modal__close');
+    const closeModalBtn = modal.querySelector('.modal__close');
     const callbackForm = document.getElementById('callbackForm');
 
     // Обработчик для кнопки в шапке
@@ -373,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Инициализация маски телефона в модальном окне
-    const modalPhoneInput = callbackForm.querySelector('input[type="tel"]');
+    const modalPhoneInput = modal.querySelector('input[type="tel"]');
     const modalPhoneMask = IMask(modalPhoneInput, {
         mask: '+{7} (000) 000-00-00',
         lazy: false
@@ -485,6 +519,9 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
     // Инициализация модального окна для товара
     const productModal = document.getElementById('productRequestModal');
+    if (!productModal) {
+        return;
+    }
     const productRequestForm = document.getElementById('productRequestForm');
 
     // Находим все кнопки "Оставить заявку" по тексту внутри span.text
@@ -646,6 +683,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     productModal.querySelector('input[name="policy"]')?.addEventListener('change', function () {
         document.getElementById('product-request-policy-error').style.display = 'none';
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.getElementById("backToTop");
+
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > 300) {
+            btn.style.display = "flex";
+        } else {
+            btn.style.display = "none";
+        }
+    });
+
+    btn.addEventListener("click", () => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
     });
 });
 

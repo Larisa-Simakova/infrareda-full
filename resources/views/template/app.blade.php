@@ -14,10 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/froala-editor@latest/js/froala_editor.pkgd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/froala-editor@latest/js/languages/ru.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <!-- Подключаем CKEditor 5 (Classic Editor) -->
-    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
-    <!-- Плагин для загрузки изображений -->
-    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/translations/ru.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://unpkg.com/imask"></script>
     <script src="{{ secure_asset('assets/js/script.js') }}" defer></script>
     <script src="{{ secure_asset('assets/js/admin-form.js') }}"></script>
@@ -104,6 +101,13 @@
             </form>
         </div>
     </div>
+
+    <!-- Кнопка "Наверх" -->
+    <button id="backToTop" class="back-to-top">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 15L12 9L6 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </button>
 </body>
 
 </html>

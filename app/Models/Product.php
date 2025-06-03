@@ -13,6 +13,7 @@ class Product extends Model
         'title',
         'description',
         'short_description',
+        'order'
     ];
 
     public function images()
@@ -61,7 +62,7 @@ class Product extends Model
 
     public function advantages()
     {
-        return $this->hasMany(Advantage::class);
+        return $this->hasMany(Advantage::class)->orderBy('order');
     }
 
     public function faqs()

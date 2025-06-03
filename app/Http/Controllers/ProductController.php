@@ -10,13 +10,15 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+
 
 
 class ProductController extends Controller
 {
     public function showCatalog()
     {
-        $products = Product::all();
+        $products = Product::orderBy('order')->get();
         return view('pages.catalog', compact('products'));
     }
 
@@ -244,6 +246,31 @@ class ProductController extends Controller
             return response()->json([
                 'error' => $e->getMessage(),
                 'uploaded' => false
+            ], 500);
+        }
+    }
+
+    public function updateOrder(Request $request)
+    {
+        $request->validate([
+            'order' => 'required|array',
+            'order.*.id' => 'required|exists:products,id',
+            'order.*.position' => 'required|integer'
+        ]);
+
+        try {
+            DB::transaction(function () use ($request) {
+                foreach ($request->order as $item) {
+                    Product::where('id', $item['id'])
+                        ->update(['order' => $item['position']]);
+                }
+            });
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ошибка при обновлении порядка: ' . $e->getMessage()
             ], 500);
         }
     }

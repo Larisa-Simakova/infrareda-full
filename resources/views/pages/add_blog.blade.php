@@ -130,7 +130,7 @@
             });
         });
 
-        initFroalaEditor('#editor', '{{ route('blog.image.description.upload') }}');
+        initFroalaEditor('#editor');
 
         setupImageUpload('blogImageUpload', 'blogImages',
             '/temp-upload-blog-image',

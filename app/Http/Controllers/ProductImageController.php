@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProductImageController extends Controller
 {
@@ -34,7 +36,7 @@ class ProductImageController extends Controller
             $tempFiles[$tempId] = $path;
             $uploadedImages[] = [
                 'temp_id' => $tempId,
-                'url' => secure_asset('storage/' . $path)
+                'url' => asset('storage/' . $path)
             ];
         }
 

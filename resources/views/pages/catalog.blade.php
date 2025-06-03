@@ -4,9 +4,10 @@
         <div class="container">
             <p class="text-small"><a href="{{ route('view.main') }}">Главная</a> — <span>Каталог</span></p>
             <h2>Каталог</h2>
-            <div class="catalog__items">
+
+            <div class="catalog__items" id="sortable-products">
                 @forelse ($products as $product)
-                    <div class="catalog__item">
+                    <div class="catalog__item" data-product-id="{{ $product->id }}">
                         <div class="catalog__item__content">
                             <div class="catalog__item__description">
                                 <p class="text-main">{{ $product->title }}</p>
@@ -38,4 +39,61 @@
             </div>
         </div>
     </section>
+
+    @auth
+        @if (auth()->user()->role === 'admin')
+            <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const sortable = new Sortable(document.getElementById('sortable-products'), {
+                        animation: 150,
+                        handle: '.catalog__item',
+                        ghostClass: 'sortable-ghost',
+                        onEnd: function() {
+                            const productItems = document.querySelectorAll('.catalog__item');
+                            const order = Array.from(productItems).map((item, index) => ({
+                                id: item.dataset.productId,
+                                position: index + 1
+                            }));
+
+                            fetch('{{ route('admin.products.update-order') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({
+                                        order: order
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        showNotification('Порядок товаров успешно обновлен', 'success');
+                                    } else {
+                                        showNotification('Ошибка сохранения порядка', 'error');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    showNotification('Ошибка сохранения порядка', 'error');
+                                });
+                        }
+                    });
+                });
+            </script>
+
+            <style>
+                .sortable-ghost {
+                    opacity: 0.5;
+                    background: #f8f9fa;
+                    border: 2px dashed #dee2e6;
+                }
+
+                #sortable-products .catalog__item {
+                    cursor: move;
+                }
+            </style>
+        @endif
+    @endauth
 @endsection
